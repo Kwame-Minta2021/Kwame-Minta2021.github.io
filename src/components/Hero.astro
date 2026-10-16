@@ -15,12 +15,12 @@ const nameWords = site.name.split(' ').length;
   <!-- Faint engineering grid behind the hero -->
   <div class="hero-grid pointer-events-none absolute inset-0 -z-10" aria-hidden="true"></div>
 
-  <div class="container-x pt-8 pb-16 md:pt-20 md:pb-24">
+  <div class="container-x pt-6 pb-12 md:pt-20 md:pb-24">
     <div class="grid items-center gap-6 md:grid-cols-[1fr_17rem] md:gap-14 lg:grid-cols-[1fr_20rem]">
-      <div class="hero-in">
-        <p class="eyebrow mb-4 flex flex-wrap items-baseline gap-x-2" style="--i:0">
+      <div class="hero-in text-center md:text-left">
+        <p class="eyebrow mb-4 flex flex-col items-center gap-y-1 md:flex-row md:items-baseline md:gap-x-2" style="--i:0">
           <span>Robotics research</span>
-          <span aria-hidden="true" class="text-muted">/</span>
+          <span aria-hidden="true" class="hidden text-muted md:inline">/</span>
           <span class="sr-only">Focus areas: {focusAreas.join(', ')}.</span>
           <span class="rotator" aria-hidden="true">
             <span class="rotator-track">
@@ -40,7 +40,7 @@ const nameWords = site.name.split(' ').length;
           class="mt-5 font-serif text-2xl leading-snug text-accent italic sm:text-[1.75rem]"
         />
 
-        <p class="mt-5 max-w-[40rem] text-lg text-muted" style="--i:6">{site.identity}</p>
+        <p class="mx-auto mt-5 max-w-[40rem] text-[1.0625rem] text-muted sm:text-lg md:mx-0" style="--i:6">{site.identity}</p>
         <p
           class="mt-5 inline-flex items-center gap-2 rounded-full border border-line bg-bg px-3.5 py-1.5 text-sm font-medium"
           style="--i:7"
@@ -49,18 +49,19 @@ const nameWords = site.name.split(' ').length;
           {site.status}
         </p>
 
-        <ul class="mt-8 flex flex-wrap gap-3" aria-label="Links" style="--i:8">
-          <li>
+        <!-- Phones: full-width CV button above a 2x2 grid. Tablet/desktop: one wrapping row. -->
+        <ul class="hero-links mt-7 grid grid-cols-2 gap-2.5 sm:flex sm:flex-wrap sm:justify-center sm:gap-3 md:mt-8 md:justify-start" aria-label="Links" style="--i:8">
+          <li class="col-span-2">
             <a href={site.cv} class="btn btn-primary btn-shine" download><Icon name="download" /> Download CV</a>
           </li>
           <li><a href={`mailto:${site.email}`} class="btn bg-bg"><Icon name="mail" /> Email</a></li>
           <li><a href={site.github} class="btn bg-bg" rel="me noopener"><Icon name="github" /> GitHub</a></li>
           <li><a href={site.linkedin} class="btn bg-bg" rel="me noopener"><Icon name="linkedin" /> LinkedIn</a></li>
-          <li><a href={site.scholar} class="btn bg-bg" rel="noopener"><Icon name="scholar" /> Google Scholar</a></li>
+          <li><a href={site.scholar} class="btn bg-bg" rel="noopener"><Icon name="scholar" /> <span class="sm:hidden">Scholar</span><span class="hidden sm:inline">Google Scholar</span></a></li>
         </ul>
       </div>
 
-      <div class="hero-photo relative order-first w-40 sm:w-48 md:order-none md:w-auto">
+      <div class="hero-photo relative order-first mx-auto w-52 sm:w-60 md:order-none md:mx-0 md:w-auto">
         <div class="portrait relative aspect-[4/5]">
           <!-- Disc + LiDAR-style sweep behind the cut-out portrait (decorative) -->
           <div class="disc-wrap absolute inset-x-[7%] bottom-0 aspect-square" aria-hidden="true">
@@ -89,6 +90,13 @@ const nameWords = site.name.split(' ').length;
 </section>
 
 <style>
+  /* Phones: buttons fill their grid cells so the 2x2 block reads as one unit. */
+  @media (max-width: 639px) {
+    .hero-links .btn {
+      width: 100%;
+      justify-content: center;
+    }
+  }
   /* Soft teal disc the portrait stands in front of; head and shoulders rise above it. */
   .portrait-disc {
     background:

@@ -98,4 +98,10 @@ const lidarLen = len(lidar);
     font-family: var(--font-sans);
     font-size: 12px;
   }
+  /* The SVG scales down on phones, so enlarge its labels to stay readable (~10px on screen). */
+  @media (max-width: 639px) {
+    .scope-label {
+      font-size: 17px;
+    }
+  }
 </style>
