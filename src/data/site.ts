@@ -7,7 +7,6 @@ export const site = {
   tagline: 'Building robots that know when not to trust their own senses.',
   identity:
     'Robotics researcher working on embedded autonomy, perception-aware planning and hardware-aware robot reliability. Research Assistant at Ashesi University, Ghana.',
-  status: 'Applying to Ph.D. programs for Fall 2027.',
   description:
     'Frederick Kwame Minta is a robotics researcher working on embedded autonomy, perception-aware planning and hardware-aware robot reliability. Research Assistant at Ashesi University, Ghana.',
   affiliation: 'Ashesi University',
