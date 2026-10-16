@@ -1,0 +1,53 @@
+---
+import SplitText from './SplitText.astro';
+import { affiliations, awards, service } from '../data/site';
+---
+
+<section id="awards" class="section" aria-labelledby="awards-title">
+  <div class="container-x">
+    <div class="section-head reveal">
+      <p class="eyebrow eyebrow-line" data-scramble>06 · Awards &amp; Service</p>
+      <SplitText as="h2" id="awards-title" text="Awards & service" />
+    </div>
+
+    <div class="grid gap-12 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] lg:gap-16">
+      <div class="reveal">
+        <h3 class="mb-3 font-sans text-sm font-semibold tracking-wide text-muted uppercase">Awards &amp; grants</h3>
+        <ul class="stagger divide-y divide-line">
+          {
+            awards.map((a, i) => (
+              <li style={`--i:${i}`} class="grid gap-1 py-3.5 sm:grid-cols-[6.5rem_1fr] sm:gap-4">
+                <span class="text-sm text-muted tabular-nums sm:pt-0.5">{a.date}</span>
+                <span>
+                  <span class="font-medium">{a.title}</span>
+                  {a.org && <span class="text-muted">, {a.org}</span>}
+                </span>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+
+      <div class="reveal space-y-10">
+        <div>
+          <h3 class="mb-3 font-sans text-sm font-semibold tracking-wide text-muted uppercase">Affiliations</h3>
+          <ul class="space-y-2">
+            {affiliations.map((a) => <li>{a}</li>)}
+          </ul>
+        </div>
+        <div>
+          <h3 class="mb-3 font-sans text-sm font-semibold tracking-wide text-muted uppercase">Service</h3>
+          <ul class="space-y-2">
+            {
+              service.map((s) => (
+                <li>
+                  {s.title}, {s.org}, <span class="text-muted">{s.date}</span>
+                </li>
+              ))
+            }
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

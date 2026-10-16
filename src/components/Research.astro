@@ -1,0 +1,47 @@
+---
+import SplitText from './SplitText.astro';
+import { interests } from '../data/site';
+import ScopeFigure from './ScopeFigure.astro';
+---
+
+<section id="research" class="section" aria-labelledby="research-title">
+  <div class="container-x">
+    <div class="section-head reveal">
+      <p class="eyebrow eyebrow-line" data-scramble>01 · Research</p>
+      <SplitText as="h2" id="research-title" text="When the cause is inside the machine" />
+    </div>
+
+    <div class="reveal grid gap-12 lg:grid-cols-[minmax(0,40rem)_1fr] lg:gap-16">
+      <div class="space-y-5 text-[1.0625rem]">
+        <p>
+          The first time both drive motors of our ARAP robot started together, its LiDAR went dark for about three
+          seconds. Motor inrush had pulled the supply rail down by about 1.5&nbsp;V. The software had no way to know why it
+          had stopped seeing, so it concluded that the room had emptied.
+        </p>
+        <ScopeFigure />
+        <SplitText
+          as="blockquote"
+          effect="scroll"
+          text="How should a robot reason about perception it can no longer trust, when the cause is inside the machine rather than in the room?"
+          class="border-l-2 border-accent py-1 pl-5 font-serif text-xl leading-snug text-ink italic sm:text-2xl"
+        />
+        <p>
+          Perception-aware planners predict how well a robot will sense from the scene around it. I want to add evidence
+          from the robot’s own body, such as supply voltage, temperature and computing load, so the planner can avoid paths
+          that depend on sensing it is about to lose.
+        </p>
+      </div>
+
+      <div>
+        <h3 class="mb-4 font-sans text-sm font-semibold tracking-wide text-muted uppercase">Research interests</h3>
+        <ul class="stagger flex flex-col gap-3">
+          {
+            interests.map((i, n) => (
+              <li style={`--i:${n}`} class="rounded-md border border-line bg-surface px-4 py-3 text-[0.97rem] leading-snug">{i}</li>
+            ))
+          }
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>

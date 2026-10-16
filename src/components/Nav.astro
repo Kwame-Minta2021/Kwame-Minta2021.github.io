@@ -1,0 +1,102 @@
+---
+import { nav, site } from '../data/site';
+import ThemeToggle from './ThemeToggle.astro';
+---
+
+<div class="progress-bar" aria-hidden="true"></div>
+<header style="view-transition-name: site-header" class="sticky top-0 z-40 border-b border-line bg-bg/90 backdrop-blur supports-[backdrop-filter]:bg-bg/80">
+  <nav class="container-x flex h-16 items-center justify-between gap-4" aria-label="Main">
+    <a href="/" class="font-serif text-lg font-semibold whitespace-nowrap text-ink no-underline">
+      {site.name}
+    </a>
+
+    <ul class="hidden items-center gap-1 xl:flex">
+      {
+        nav.map((item) => (
+          <li>
+            <a href={item.href} class="nav-link rounded px-2.5 py-2 text-[0.93rem] text-muted no-underline transition-colors hover:text-ink">
+              {item.label}
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+
+    <div class="flex items-center gap-2">
+      <a href={site.cv} class="btn btn-primary hidden whitespace-nowrap sm:inline-flex" download>
+        Download CV
+      </a>
+      <ThemeToggle />
+
+      <!-- Mobile menu: works without JavaScript -->
+      <details class="mobile-menu relative xl:hidden">
+        <summary
+          class="inline-flex h-11 w-11 cursor-pointer list-none items-center justify-center rounded-md border border-line"
+          aria-label="Menu"
+        >
+          <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+            <path d="M4 7h16M4 12h16M4 17h16" stroke-linecap="round"></path>
+          </svg>
+        </summary>
+        <div class="absolute right-0 mt-2 w-60 rounded-lg border border-line bg-surface p-2 shadow-lg">
+          <ul>
+            {
+              nav.map((item) => (
+                <li>
+                  <a href={item.href} class="block rounded px-3 py-2.5 text-ink no-underline hover:bg-accent-soft">
+                    {item.label}
+                  </a>
+                </li>
+              ))
+            }
+            <li class="mt-1 border-t border-line pt-2 sm:hidden">
+              <a href={site.cv} class="block rounded px-3 py-2.5 font-medium no-underline hover:bg-accent-soft" download>
+                Download CV
+              </a>
+            </li>
+          </ul>
+        </div>
+      </details>
+    </div>
+  </nav>
+</header>
+
+<style>
+  summary::-webkit-details-marker {
+    display: none;
+  }
+</style>
+
+<script>
+  // Close the mobile menu after a link is chosen or Escape is pressed.
+  const menu = document.querySelector<HTMLDetailsElement>('.mobile-menu');
+  menu?.addEventListener('click', (e) => {
+    if ((e.target as HTMLElement).closest('a')) menu.open = false;
+  });
+  // Highlight the nav link for the section currently in view.
+  const links = document.querySelectorAll<HTMLAnchorElement>('.nav-link');
+  const byId = new Map([...links].map((a) => [a.hash.slice(1), a]));
+  if (byId.size && 'IntersectionObserver' in window) {
+    const spy = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          if (!e.isIntersecting) continue;
+          links.forEach((a) => a.removeAttribute('aria-current'));
+          byId.get(e.target.id)?.setAttribute('aria-current', 'true');
+        }
+      },
+      { rootMargin: '-45% 0px -50% 0px' },
+    );
+    byId.forEach((_, id) => {
+      const el = document.getElementById(id);
+      if (el) spy.observe(el);
+    });
+  }
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && menu?.open) {
+      menu.open = false;
+      menu.querySelector('summary')?.focus();
+    }
+  });
+</script>

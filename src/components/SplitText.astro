@@ -1,0 +1,41 @@
+---
+// Splits text into words at build time so each word can animate.
+// Screen readers read the plain sentence from a visually hidden copy.
+import type { HTMLTag } from 'astro/types';
+
+interface Props {
+  text: string;
+  as?: HTMLTag;
+  class?: string;
+  id?: string;
+  /** "rise": words slide up from a mask. "focus": words sharpen from a blur. "scroll": words light up while scrolling. */
+  effect?: 'rise' | 'focus' | 'scroll';
+  /** Offset for the stagger index, to chain after other animated elements. */
+  start?: number;
+  /** Word range [from, to) to underline with a hand-drawn stroke. */
+  mark?: [number, number];
+  style?: string;
+}
+
+const { text, as: Tag = 'span', class: cls, id, effect = 'rise', start = 0, mark, style } = Astro.props;
+const words = text.split(/\s+/).filter(Boolean);
+const [m0, m1] = mark ?? [-1, -1];
+const before = words.slice(0, Math.max(m0, 0));
+const marked = mark ? words.slice(m0, m1) : [];
+const after = mark ? words.slice(m1) : words;
+const offset = (n: number) => n + start;
+---
+
+<Tag class:list={['split', `split-${effect}`, cls]} id={id} style={style}>
+  <span class="sr-only">{text}</span>
+  {/* prettier-ignore */}
+  {mark ? (
+    <>
+      {before.map((w, i) => <><span class="w" aria-hidden="true"><span class="wi" style={`--w:${offset(i)}`}>{w}</span></span>{' '}</>)}
+      <span class="mark" aria-hidden="true">{marked.map((w, i) => <><span class="w"><span class="wi" style={`--w:${offset(m0 + i)}`}>{w}</span></span>{i < marked.length - 1 ? ' ' : ''}</>)}<svg class="mark-line" viewBox="0 0 200 12" preserveAspectRatio="none"><path d="M2 8 C 40 3, 90 3, 130 6 S 185 10, 198 4" pathLength="1" /></svg></span>{after.length ? ' ' : ''}
+      {after.map((w, i) => <><span class="w" aria-hidden="true"><span class="wi" style={`--w:${offset(m1 + i)}`}>{w}</span></span>{i < after.length - 1 ? ' ' : ''}</>)}
+    </>
+  ) : (
+    words.map((w, i) => <><span class="w" aria-hidden="true"><span class="wi" style={`--w:${offset(i)}`}>{w}</span></span>{i < words.length - 1 ? ' ' : ''}</>)
+  )}
+</Tag>

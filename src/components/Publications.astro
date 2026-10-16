@@ -1,0 +1,113 @@
+---
+import SplitText from './SplitText.astro';
+import { getCollection, type CollectionEntry } from 'astro:content';
+import { site } from '../data/site';
+import Icon from './Icon.astro';
+
+type Status = CollectionEntry<'publications'>['data']['status'];
+
+const groups: { status: Status; label: string }[] = [
+  { status: 'under-review', label: 'Under review' },
+  { status: 'in-preparation', label: 'In preparation' },
+  { status: 'journal', label: 'Journal articles' },
+  { status: 'conference', label: 'Conference papers' },
+  { status: 'presentation', label: 'Presentations' },
+];
+
+const pubs = (await getCollection('publications')).sort(
+  (a, b) => (b.data.year ?? 9999) - (a.data.year ?? 9999) || a.data.order - b.data.order,
+);
+
+const ME = 'F. K. Minta';
+const docLink = (doi: string) => (doi.startsWith('http') ? doi : `https://doi.org/${doi}`);
+---
+
+<section id="publications" class="section" aria-labelledby="publications-title">
+  <div class="container-x">
+    <div class="section-head reveal">
+      <p class="eyebrow eyebrow-line" data-scramble>03 · Publications</p>
+      <SplitText as="h2" id="publications-title" text="Publications" />
+      <p class="mt-1">
+        <a class="link-u inline-flex items-center gap-2 text-[0.95rem]" href={site.scholar} rel="noopener">
+          <Icon name="scholar" /> Google Scholar
+        </a>
+      </p>
+    </div>
+
+    <div class="max-w-[52rem] space-y-12">
+      {
+        groups.map((g) => {
+          const items = pubs.filter((p) => p.data.status === g.status);
+          if (items.length === 0) return null;
+          return (
+            <div class="reveal">
+              <h3 class="mb-5 border-b border-line pb-2 font-sans text-sm font-semibold tracking-wide text-muted uppercase">
+                {g.label}
+              </h3>
+              <ol class="stagger space-y-7">
+                {items.map(({ data: p }, i) => (
+                  <li style={`--i:${i}`}>
+                    <p class="font-serif text-lg leading-snug font-semibold">{p.title}</p>
+                    <p class="mt-1.5 text-[0.95rem]">
+                      {p.authors.map((a, i) => (
+                        <>
+                          {a === ME ? <strong class="font-semibold text-ink">{a}</strong> : <span class="text-muted">{a}</span>}
+                          {i < p.authors.length - 1 && <span class="text-muted">, </span>}
+                        </>
+                      ))}
+                    </p>
+                    <p class="mt-1 text-[0.95rem] text-muted">
+                      <em>{p.venue}</em>
+                      {p.year && <>, {p.year}</>}
+                      {p.note && p.note !== g.label && (
+                        <>
+                          {' · '}
+                          <span class="font-medium text-accent">{p.note}</span>
+                        </>
+                      )}
+                    </p>
+                    {(p.pdf || p.doi || p.code) && (
+                      <ul class="mt-2.5 flex flex-wrap gap-2 text-sm" aria-label="Links">
+                        {p.pdf && (
+                          <li>
+                            <a class="pub-btn" href={p.pdf}>PDF</a>
+                          </li>
+                        )}
+                        {p.doi && (
+                          <li>
+                            <a class="pub-btn" href={docLink(p.doi)}>DOI</a>
+                          </li>
+                        )}
+                        {p.code && (
+                          <li>
+                            <a class="pub-btn" href={p.code}>Code</a>
+                          </li>
+                        )}
+                      </ul>
+                    )}
+                  </li>
+                ))}
+              </ol>
+            </div>
+          );
+        })
+      }
+    </div>
+  </div>
+</section>
+
+<style>
+  .pub-btn {
+    display: inline-block;
+    padding: 0.15rem 0.6rem;
+    border: 1px solid var(--line);
+    border-radius: 0.25rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-decoration: none;
+  }
+  .pub-btn:hover {
+    border-color: var(--accent);
+  }
+</style>

@@ -1,0 +1,23 @@
+---
+import SplitText from './SplitText.astro';
+import { teaching } from '../data/site';
+---
+
+<section id="teaching" class="section" aria-labelledby="teaching-title">
+  <div class="container-x">
+    <div class="section-head reveal">
+      <p class="eyebrow eyebrow-line" data-scramble>05 · Teaching &amp; Outreach</p>
+      <SplitText as="h2" id="teaching-title" text="Teaching & outreach" />
+    </div>
+    <ul class="reveal stagger grid gap-6 md:grid-cols-3">
+      {
+        teaching.map((t, i) => (
+          <li class="border-t-2 border-accent pt-5" style={`--i:${i * 1.5}`}>
+            <h3 class="text-xl">{t.title}</h3>
+            <p class="mt-2 text-[0.97rem] text-muted">{t.body}</p>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</section>

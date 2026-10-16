@@ -1,0 +1,62 @@
+---
+import SplitText from './SplitText.astro';
+import { education, experience, skills } from '../data/site';
+---
+
+<section id="experience" class="section" aria-labelledby="experience-title">
+  <div class="container-x">
+    <div class="section-head reveal">
+      <p class="eyebrow eyebrow-line" data-scramble>04 · Experience</p>
+      <SplitText as="h2" id="experience-title" text="Experience" />
+    </div>
+
+    <div class="grid gap-14 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:gap-16">
+      <ol class="timeline reveal stagger ml-1.5">
+        {
+          experience.map((e, i) => (
+            <li class="relative pb-8 pl-7 last:pb-0" style={`--i:${i}`}>
+              <span
+                class="tl-dot absolute top-[0.55rem] -left-[5px] h-[9px] w-[9px] rounded-full border-2 border-accent bg-bg"
+                aria-hidden="true"
+              />
+              <p class="text-sm text-muted">{e.period}</p>
+              <h3 class="mt-0.5 font-sans text-[1.02rem] font-semibold">{e.role}</h3>
+              <p class="text-[0.97rem] text-muted">{e.org}</p>
+            </li>
+          ))
+        }
+      </ol>
+
+      <div class="space-y-12">
+        <div class="reveal">
+          <h3 class="mb-4 font-sans text-sm font-semibold tracking-wide text-muted uppercase">Education</h3>
+          <p class="text-sm text-muted">{education.period}</p>
+          <p class="mt-0.5 font-serif text-xl font-semibold">{education.degree}</p>
+          <p class="text-muted">{education.school}</p>
+          <p class="mt-4 text-sm font-semibold">Selected coursework</p>
+          <p class="mt-1 text-[0.95rem] text-muted">{education.coursework.join(' · ')}</p>
+        </div>
+
+        <div class="reveal">
+          <h3 class="mb-4 font-sans text-sm font-semibold tracking-wide text-muted uppercase">Skills</h3>
+          <dl class="space-y-5">
+            {
+              skills.map((s) => (
+                <div>
+                  <dt class="mb-2 text-sm font-semibold">{s.group}</dt>
+                  <dd>
+                    <ul class="stagger flex flex-wrap gap-1.5">
+                      {s.items.map((i, n) => (
+                        <li class="tag" style={`--i:${n * 0.5}`}>{i}</li>
+                      ))}
+                    </ul>
+                  </dd>
+                </div>
+              ))
+            }
+          </dl>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

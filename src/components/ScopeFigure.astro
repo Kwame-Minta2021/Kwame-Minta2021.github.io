@@ -1,0 +1,101 @@
+---
+// Illustrative "oscilloscope" of the ARAP failure mode: when both motors start,
+// the supply rail sags and the LiDAR stops returning points for a few seconds.
+// Shapes are schematic, NOT measured data (the caption says so).
+
+const W = 560;
+const X0 = 24;
+const X1 = W - 16;
+const START = 180; // motors start
+const DROP_END = 330; // LiDAR recovers
+
+// Deterministic pseudo-random so the build is stable.
+let seed = 7;
+const rand = () => ((seed = (seed * 9301 + 49297) % 233280) / 233280);
+
+const len = (pts: [number, number][]) =>
+  Math.round(pts.slice(1).reduce((s, p, i) => s + Math.hypot(p[0] - pts[i][0], p[1] - pts[i][1]), 0));
+const toPath = (pts: [number, number][]) => pts.map((p, i) => `${i ? 'L' : 'M'}${p[0].toFixed(1)} ${p[1].toFixed(1)}`).join(' ');
+
+// Supply rail: flat, sharp sag at motor start, recovery with small overshoot.
+const rail: [number, number][] = [];
+for (let x = X0; x <= X1; x += 4) {
+  let y = 58 + (rand() - 0.5) * 1.6;
+  if (x >= START) {
+    const t = (x - START) / 22;
+    y += 34 * Math.exp(-t * 0.55) * Math.min(1, t / 0.4);
+  }
+  rail.push([x, y]);
+}
+
+// LiDAR returns: noisy activity, flat during dropout, then back.
+const lidar: [number, number][] = [];
+for (let x = X0; x <= X1; x += 5) {
+  const out = x > START + 8 && x < DROP_END;
+  const y = out ? 186 : 158 + (rand() - 0.5) * 30;
+  lidar.push([x, y]);
+}
+
+const railLen = len(rail);
+const lidarLen = len(lidar);
+---
+
+<figure class="scope reveal my-8 rounded-lg border border-line bg-surface p-4 sm:p-5">
+  <svg
+    viewBox={`0 0 ${W} 220`}
+    class="h-auto w-full overflow-visible"
+    role="img"
+    aria-labelledby="scope-title scope-desc"
+  >
+    <title id="scope-title">Illustration of a hardware-induced perception failure</title>
+    <desc id="scope-desc">
+      Two schematic traces over time. When both drive motors start, the supply-rail voltage sags by about 1.5 volts, and
+      the LiDAR trace goes flat for about three seconds before recovering.
+    </desc>
+
+    <!-- grid -->
+    <g stroke="var(--line)" stroke-width="1">
+      {[0, 1, 2, 3, 4, 5, 6, 7].map((i) => <line x1={X0 + i * 65} y1="16" x2={X0 + i * 65} y2="204" />)}
+      <line x1={X0} y1="110" x2={X1} y2="110" />
+    </g>
+
+    <!-- dropout window -->
+    <rect x={START + 8} y="120" width={DROP_END - START - 8} height="84" fill="var(--accent-soft)" />
+
+    <!-- motor start marker -->
+    <line x1={START} y1="16" x2={START} y2="204" stroke="var(--muted)" stroke-dasharray="3 4" />
+    <text x={START + 6} y="28" class="scope-label" fill="var(--muted)">both motors start</text>
+
+    <!-- labels -->
+    <text x={X0} y="28" class="scope-label" fill="var(--text)" font-weight="600">Supply rail</text>
+    <text x={X0} y="136" class="scope-label" fill="var(--text)" font-weight="600">LiDAR returns</text>
+
+    <!-- traces -->
+    <path class="trace" d={toPath(rail)} fill="none" stroke="var(--accent)" stroke-width="2" stroke-linejoin="round" style={`--len:${railLen}`} />
+    <path class="trace trace-2" d={toPath(lidar)} fill="none" stroke="var(--text)" stroke-width="1.4" stroke-linejoin="round" style={`--len:${lidarLen}`} />
+
+    <!-- annotations -->
+    <g class="scope-note">
+      <line x1={START + 30} y1="64" x2={START + 30} y2="90" stroke="var(--accent)" stroke-width="1.2" />
+      <text x={START + 38} y="84" class="scope-label" fill="var(--accent)" font-weight="600">≈ 1.5 V sag</text>
+      <text x={(START + DROP_END) / 2 + 4} y="200" text-anchor="middle" class="scope-label" fill="var(--accent)" font-weight="600">
+        no returns ≈ 3 s
+      </text>
+    </g>
+
+    <!-- scanning cursor -->
+    <line class="scope-cursor" x1={X0} y1="16" x2={X0} y2="204" stroke="var(--accent)" stroke-opacity="0.5" style={`--scan-w:${X1 - X0}px`} />
+  </svg>
+  <figcaption class="mt-3 text-sm text-muted">
+    <span class="font-semibold text-ink">Fig. 1.</span> Schematic illustration, not measured data. Motor inrush pulls the
+    supply rail down by about 1.5&nbsp;V, and the LiDAR stops returning points for about 3&nbsp;s. To the planner, the room
+    looks empty.
+  </figcaption>
+</figure>
+
+<style>
+  .scope-label {
+    font-family: var(--font-sans);
+    font-size: 12px;
+  }
+</style>

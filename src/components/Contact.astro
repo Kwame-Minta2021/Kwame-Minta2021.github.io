@@ -1,0 +1,39 @@
+---
+import SplitText from './SplitText.astro';
+import { site } from '../data/site';
+import Icon from './Icon.astro';
+---
+
+<section id="contact" class="section" aria-labelledby="contact-title">
+  <div class="container-x reveal">
+    <div class="section-head">
+      <p class="eyebrow eyebrow-line" data-scramble>07 · Contact</p>
+      <SplitText as="h2" id="contact-title" text="Get in touch" />
+    </div>
+    <p class="max-w-[38rem] text-lg text-muted">
+      I am applying to Ph.D. programs for Fall 2027 and would be glad to hear from faculty working on related problems.
+    </p>
+    <ul class="mt-8 space-y-4 text-lg">
+      <li class="flex items-center gap-3">
+        <Icon name="mail" class="h-5 w-5 shrink-0 text-muted" />
+        <a class="link-u" href={`mailto:${site.email}`}>{site.email}</a>
+      </li>
+      <li class="flex items-center gap-3">
+        <Icon name="github" class="h-5 w-5 shrink-0 text-muted" />
+        <a class="link-u" href={site.github} rel="me noopener">github.com/Kwame-Minta2021</a>
+      </li>
+      <li class="flex items-center gap-3">
+        <Icon name="linkedin" class="h-5 w-5 shrink-0 text-muted" />
+        <a class="link-u" href={site.linkedin} rel="me noopener">linkedin.com/in/minta-frederick-kwame</a>
+      </li>
+      <li class="flex items-center gap-3">
+        <Icon name="scholar" class="h-5 w-5 shrink-0 text-muted" />
+        <a class="link-u" href={site.scholar} rel="noopener">Google Scholar</a>
+      </li>
+      <li class="flex items-center gap-3">
+        <Icon name="pin" class="h-5 w-5 shrink-0 text-muted" />
+        <span>{site.location}</span>
+      </li>
+    </ul>
+  </div>
+</section>

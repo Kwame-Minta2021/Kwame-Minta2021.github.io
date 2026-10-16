@@ -1,0 +1,273 @@
+---
+import { Image } from 'astro:assets';
+import { getCollection, render, type CollectionEntry } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import Icon from '../../components/Icon.astro';
+import { site } from '../../data/site';
+
+export async function getStaticPaths() {
+  const projects = (await getCollection('projects')).sort((a, b) => a.data.order - b.data.order);
+  return projects.map((project, i) => ({
+    params: { slug: project.id },
+    props: { project, next: projects[(i + 1) % projects.length] },
+  }));
+}
+
+interface Props {
+  project: CollectionEntry<'projects'>;
+  next: CollectionEntry<'projects'>;
+}
+
+const { project, next } = Astro.props;
+const p = project.data;
+const { Content } = await render(project);
+
+const facts = [
+  { k: 'Period', v: p.period },
+  { k: 'Affiliation', v: p.affiliation },
+  { k: 'Supervisor', v: p.supervisor },
+  { k: 'Funding', v: p.funding },
+].filter((f) => f.v);
+
+const links = [
+  { label: 'Code on GitHub', href: p.links.github },
+  { label: 'Paper', href: p.links.paper },
+  { label: 'Hardware files', href: p.links.hardware },
+].filter((l) => l.href);
+
+// Accepts any YouTube link form: youtu.be/ID, watch?v=ID, /embed/ID, /shorts/ID.
+const ytId = p.video?.match(/(?:youtu\.be\/|[?&]v=|\/embed\/|\/shorts\/)([\w-]{11})/)?.[1];
+---
+
+<Base title={`${p.title} | ${site.name}`} description={p.summary} type="article">
+  <article>
+    <header class="hero-in container-x pt-10 pb-8 md:pt-14">
+      <nav aria-label="Breadcrumb" class="mb-6 text-sm">
+        <a href="/#projects" class="inline-flex items-center gap-1.5 no-underline hover:underline">
+          <Icon name="arrow" class="h-4 w-4 rotate-180" /> All projects
+        </a>
+      </nav>
+      <p class="eyebrow mb-3" style="--i:1">Project</p>
+      <h1
+        class="max-w-[48rem] text-[2rem] leading-tight sm:text-4xl lg:text-5xl"
+        style={`--i:2; view-transition-name: title-${project.id}`}
+      >
+        {p.title}
+      </h1>
+      <p class="mt-4 max-w-[44rem] text-lg text-muted" style="--i:3">{p.summary}</p>
+    </header>
+
+    <div class="container-x">
+      <div class="overflow-hidden rounded-lg border border-line" style={`view-transition-name: img-${project.id}`}>
+      <!-- TODO: replace the hero placeholder in src/assets/images/projects/<slug>/hero.jpg -->
+      <Image
+        src={p.heroImage}
+        alt={p.heroAlt}
+        widths={[480, 800, 1200, 1600]}
+        sizes="(min-width: 1152px) 68rem, 100vw"
+        loading="eager"
+        fetchpriority="high"
+        class="aspect-[16/9] w-full object-cover"
+      />
+      </div>
+    </div>
+
+    <div class="container-x grid gap-12 py-12 md:py-16 lg:grid-cols-[minmax(0,1fr)_18rem] lg:gap-16">
+      <div class="min-w-0 max-w-[44rem]">
+        <section aria-labelledby="role-title" class="reveal">
+          <h2 id="role-title" class="text-2xl">My role</h2>
+          <p class="mt-3">{p.role}</p>
+        </section>
+
+        <section aria-labelledby="highlights-title" class="reveal mt-10">
+          <h2 id="highlights-title" class="text-2xl">Technical details</h2>
+          <ul class="stagger mt-3 list-disc space-y-2 pl-5">
+            {p.highlights.map((h, i) => <li style={`--i:${i}`}>{h}</li>)}
+          </ul>
+        </section>
+
+        <div class="prose-body reveal mt-6">
+          <Content />
+        </div>
+
+        {
+          p.results.length > 0 && (
+            <section aria-labelledby="results-title" class="reveal mt-12 rounded-lg border border-line bg-surface p-6">
+              <h2 id="results-title" class="text-2xl">Results</h2>
+              <ul class="mt-3 list-disc space-y-2 pl-5">
+                {p.results.map((r) => (
+                  <li>{r}</li>
+                ))}
+              </ul>
+              {p.limitations.length > 0 && (
+                <>
+                  <h3 class="mt-6 font-sans text-sm font-semibold tracking-wide text-muted uppercase">Limitations</h3>
+                  <ul class="mt-2 list-disc space-y-1.5 pl-5 text-[0.95rem] text-muted">
+                    {p.limitations.map((l) => (
+                      <li>{l}</li>
+                    ))}
+                  </ul>
+                </>
+              )}
+            </section>
+          )
+        }
+
+        {
+          p.specs.length > 0 && (
+            <section aria-labelledby="specs-title" class="reveal mt-12">
+              <h2 id="specs-title" class="text-2xl">Measured characteristics</h2>
+              <table class="mt-4 w-full text-left text-[0.95rem]">
+                <tbody class="stagger">
+                  {p.specs.map((sp, i) => (
+                    <tr class="border-b border-line" style={`--i:${i * 0.5}`}>
+                      <th scope="row" class="w-28 py-2.5 pr-4 align-top font-semibold sm:w-36">
+                        {sp.label}
+                      </th>
+                      <td class="py-2.5 text-muted">{sp.value}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </section>
+          )
+        }
+
+        <section aria-labelledby="media-title" class="reveal mt-12">
+          <h2 id="media-title" class="text-2xl">Media</h2>
+          {
+            ytId ? (
+              // Click-to-load: nothing is requested from YouTube's player (and no cookies are set)
+              // until the visitor presses play.
+              <div class="yt-facade group relative mt-4 aspect-video overflow-hidden rounded-lg border border-line bg-black" data-yt={ytId}>
+                <img
+                  src={`https://i.ytimg.com/vi/${ytId}/hqdefault.jpg`}
+                  alt=""
+                  loading="lazy"
+                  decoding="async"
+                  class="h-full w-full object-cover opacity-90 transition-opacity group-hover:opacity-100"
+                />
+                <button
+                  type="button"
+                  class="absolute inset-0 flex items-center justify-center"
+                  aria-label={`Play video: ${p.title}`}
+                >
+                  <span class="flex h-16 w-16 items-center justify-center rounded-full bg-accent text-on-accent shadow-lg transition-transform group-hover:scale-110">
+                    <svg viewBox="0 0 24 24" class="ml-1 h-7 w-7" fill="currentColor" aria-hidden="true">
+                      <path d="M8 5v14l11-7z" />
+                    </svg>
+                  </span>
+                </button>
+              </div>
+            ) : p.video ? (
+              <div class="mt-4 aspect-video overflow-hidden rounded-lg border border-line">
+                <iframe
+                  src={p.video}
+                  title={`${p.title}: video`}
+                  loading="lazy"
+                  allow="accelerometer; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+                  referrerpolicy="strict-origin-when-cross-origin"
+                  class="h-full w-full"
+                />
+              </div>
+            ) : (
+              // TODO: add `video:` to this project's frontmatter to embed a video here.
+              <p class="mt-3 rounded-md border border-dashed border-line px-4 py-6 text-center text-sm text-muted">
+                Video coming soon.
+              </p>
+            )
+          }
+          {
+            p.gallery.length > 0 && (
+              <div class="stagger mt-6 gap-4 sm:columns-2">
+                {p.gallery.map((g, i) => (
+                  <figure class:list={['mb-5 break-inside-avoid', g.wide && '[column-span:all]']} style={`--i:${i}`}>
+                    <a
+                      href={g.src.src}
+                      class="card-lift relative block overflow-hidden rounded-lg border border-line bg-surface"
+                      aria-label={`Open full-size image: ${g.alt}`}
+                    >
+                      <Image
+                        src={g.src}
+                        alt={g.alt}
+                        widths={g.wide ? [640, 900, 1400] : [400, 640, 900]}
+                        sizes={g.wide ? '(min-width: 768px) 44rem, 100vw' : '(min-width: 768px) 22rem, 100vw'}
+                        class="card-img h-auto w-full"
+                      />
+                    </a>
+                    {g.caption && <figcaption class="mt-2 text-sm leading-snug text-muted">{g.caption}</figcaption>}
+                  </figure>
+                ))}
+              </div>
+            )
+          }
+        </section>
+      </div>
+
+      <aside class="reveal space-y-8 lg:sticky lg:top-24 lg:self-start" aria-label="Project facts">
+        <dl class="space-y-4 text-[0.95rem]">
+          {
+            facts.map((f) => (
+              <div>
+                <dt class="text-xs font-semibold tracking-wide text-muted uppercase">{f.k}</dt>
+                <dd class="mt-0.5">{f.v}</dd>
+              </div>
+            ))
+          }
+        </dl>
+
+        <div>
+          <h2 class="mb-2 font-sans text-xs font-semibold tracking-wide text-muted uppercase">Tech stack</h2>
+          <ul class="flex flex-wrap gap-1.5">
+            {p.tags.map((t) => <li class="tag">{t}</li>)}
+          </ul>
+        </div>
+
+        <div>
+          <h2 class="mb-2 font-sans text-xs font-semibold tracking-wide text-muted uppercase">Links</h2>
+          {
+            links.length > 0 ? (
+              <ul class="space-y-2">
+                {links.map((l) => (
+                  <li>
+                    <a href={l.href} class="inline-flex items-center gap-1.5">
+                      {l.label} <Icon name="external" class="h-3.5 w-3.5" />
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              // TODO: add `links:` (github / paper / hardware) to this project's frontmatter.
+              <p class="text-sm text-muted">Code and paper links coming soon.</p>
+            )
+          }
+        </div>
+      </aside>
+    </div>
+
+    <nav class="container-x border-t border-line py-10" aria-label="Next project">
+      <p class="text-sm text-muted">Next project</p>
+      <a href={`/projects/${next.id}/`} class="mt-1 inline-flex items-center gap-2 font-serif text-2xl no-underline hover:underline">
+        {next.data.title} <Icon name="arrow" class="h-5 w-5" />
+      </a>
+    </nav>
+  </article>
+</Base>
+
+<script>
+  // Swap the thumbnail for YouTube's privacy-enhanced player on click.
+  document.querySelectorAll<HTMLElement>('.yt-facade').forEach((el) => {
+    el.querySelector('button')?.addEventListener('click', () => {
+      const id = el.dataset.yt;
+      const iframe = document.createElement('iframe');
+      iframe.src = `https://www.youtube-nocookie.com/embed/${id}?autoplay=1&rel=0`;
+      iframe.title = el.querySelector('button')?.getAttribute('aria-label') ?? 'Video';
+      iframe.allow = 'accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture; fullscreen';
+      iframe.referrerPolicy = 'strict-origin-when-cross-origin';
+      iframe.allowFullscreen = true;
+      iframe.className = 'h-full w-full';
+      el.replaceChildren(iframe);
+      iframe.focus();
+    });
+  });
+</script>

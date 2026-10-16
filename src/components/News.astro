@@ -1,0 +1,27 @@
+---
+// Renders only when src/content/news has at least one entry.
+import { getCollection } from 'astro:content';
+
+const items = (await getCollection('news', (n) => !n.data.draft)).sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf()).slice(0, 5);
+const fmt = new Intl.DateTimeFormat('en-GB', { month: 'short', year: 'numeric' });
+---
+
+{
+  items.length > 0 && (
+    <section class="container-x pb-14" aria-labelledby="news-title">
+      <h2 id="news-title" class="eyebrow mb-3">
+        News
+      </h2>
+      <ul class="max-w-[48rem] divide-y divide-line border-y border-line">
+        {items.map((n) => (
+          <li class="grid gap-1 py-3 sm:grid-cols-[6.5rem_1fr] sm:gap-4">
+            <time class="text-sm text-muted tabular-nums sm:pt-0.5" datetime={n.data.date.toISOString()}>
+              {fmt.format(n.data.date)}
+            </time>
+            <span>{n.data.link ? <a href={n.data.link}>{n.data.title}</a> : n.data.title}</span>
+          </li>
+        ))}
+      </ul>
+    </section>
+  )
+}

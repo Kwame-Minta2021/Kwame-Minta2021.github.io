@@ -1,0 +1,158 @@
+---
+import '@fontsource-variable/inter/wght.css';
+import '@fontsource-variable/source-serif-4/wght.css';
+import '@fontsource-variable/source-serif-4/wght-italic.css';
+import '../styles/global.css';
+import SEO from '../components/SEO.astro';
+import Nav from '../components/Nav.astro';
+import { site } from '../data/site';
+
+interface Props {
+  title?: string;
+  description?: string;
+  image?: string;
+  type?: 'website' | 'article';
+}
+
+const {
+  title = `${site.name} | Robotics Researcher`,
+  description = site.description,
+  image,
+  type,
+} = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!-- Set theme before paint to avoid a flash of the wrong theme. -->
+    <script is:inline>
+      (function () {
+        var d = document.documentElement;
+        d.classList.add('js');
+        var t = null;
+        try {
+          t = localStorage.getItem('theme');
+        } catch (e) {}
+        if (t === 'light' || t === 'dark') d.dataset.theme = t;
+        d.dataset.resolvedTheme =
+          t || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+      })();
+    </script>
+    <meta name="theme-color" content="#faf9f6" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#111414" media="(prefers-color-scheme: dark)" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+    <SEO title={title} description={description} image={image} type={type} />
+  </head>
+  <body class="min-h-screen">
+    <a
+      href="#main"
+      class="sr-only z-50 rounded bg-accent px-4 py-2 text-on-accent focus:not-sr-only focus:fixed focus:top-3 focus:left-3"
+      >Skip to content</a
+    >
+    <Nav />
+    <main id="main" tabindex="-1">
+      <slot />
+    </main>
+    <footer class="border-t border-line py-10 text-sm text-muted">
+      <div class="container-x flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <p>© {new Date().getFullYear()} {site.name}. {site.location}.</p>
+        <p>No cookies, no tracking.</p>
+      </div>
+    </footer>
+
+    <script>
+      const motionOK = window.matchMedia('(prefers-reduced-motion: no-preference)').matches;
+
+      // "Decode" effect: text resolves from random glyphs, like a sensor locking on.
+      const GLYPHS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789/<>#*+';
+      function scramble(el: HTMLElement) {
+        const text = el.dataset.text ?? el.textContent ?? '';
+        el.dataset.text = text;
+        const visual = el.querySelector<HTMLElement>('.scr');
+        if (!visual) return;
+        const start = performance.now();
+        const dur = 700;
+        const tick = (now: number) => {
+          const p = Math.min(1, (now - start) / dur);
+          const fixed = Math.floor(p * text.length);
+          visual.textContent = [...text]
+            .map((ch, i) => (i < fixed || ch === ' ' || ch === '·' ? ch : GLYPHS[(Math.random() * GLYPHS.length) | 0]))
+            .join('');
+          if (p < 1) requestAnimationFrame(tick);
+        };
+        requestAnimationFrame(tick);
+      }
+      // Keep the real text for screen readers; animate an aria-hidden copy.
+      if (motionOK) {
+        document.querySelectorAll<HTMLElement>('[data-scramble]').forEach((el) => {
+          const text = el.textContent?.trim() ?? '';
+          el.dataset.text = text;
+          el.innerHTML = '';
+          const sr = Object.assign(document.createElement('span'), { className: 'sr-only', textContent: text });
+          const vis = Object.assign(document.createElement('span'), { className: 'scr', textContent: text });
+          vis.setAttribute('aria-hidden', 'true');
+          el.append(sr, vis);
+        });
+      }
+
+      // Count numbers up from zero; the final value is already in the HTML.
+      function countUp(el: HTMLElement) {
+        const target = Number(el.dataset.count);
+        const decimals = Number(el.dataset.decimals ?? 0);
+        const start = performance.now();
+        const dur = 1400;
+        const tick = (now: number) => {
+          const p = Math.min(1, (now - start) / dur);
+          const eased = 1 - Math.pow(1 - p, 4);
+          el.textContent = (target * eased).toFixed(decimals);
+          if (p < 1) requestAnimationFrame(tick);
+        };
+        requestAnimationFrame(tick);
+      }
+
+      function onVisible(el: Element) {
+        el.classList.add('is-visible');
+        if (!motionOK) return;
+        el.querySelectorAll<HTMLElement>('[data-scramble]').forEach(scramble);
+        el.querySelectorAll<HTMLElement>('[data-count]').forEach(countUp);
+      }
+
+      // Reveal blocks as they enter the viewport. CSS skips the motion under prefers-reduced-motion.
+      const els = document.querySelectorAll('.reveal');
+      if ('IntersectionObserver' in window) {
+        const io = new IntersectionObserver(
+          (entries) => {
+            for (const e of entries) {
+              if (e.isIntersecting) {
+                onVisible(e.target);
+                io.unobserve(e.target);
+              }
+            }
+          },
+          { rootMargin: '0px 0px -8% 0px' },
+        );
+        els.forEach((el) => io.observe(el));
+      } else {
+        els.forEach((el) => el.classList.add('is-visible'));
+      }
+
+      // Cursor spotlight on cards.
+      if (motionOK && window.matchMedia('(hover: hover)').matches) {
+        document.addEventListener('pointermove', (e) => {
+          if (!(e.target instanceof Element)) return;
+          const card = e.target.closest<HTMLElement>('.card-lift');
+          if (!card) return;
+          const r = card.getBoundingClientRect();
+          card.style.setProperty('--mx', `${e.clientX - r.left}px`);
+          card.style.setProperty('--my', `${e.clientY - r.top}px`);
+        });
+      }
+    </script>
+  </body>
+</html>

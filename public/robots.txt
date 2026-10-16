@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://kwame-minta2021.github.io/sitemap-index.xml

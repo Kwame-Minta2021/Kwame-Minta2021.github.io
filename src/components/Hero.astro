@@ -1,0 +1,113 @@
+---
+import { Image } from 'astro:assets';
+// Background-removed portrait (transparent PNG), blended into the hero below.
+import portrait from '../assets/images/portrait-cutout.png';
+import { site } from '../data/site';
+import Icon from './Icon.astro';
+import SplitText from './SplitText.astro';
+
+// Phrases taken from the identity line; the first is repeated at the end for a seamless loop.
+const focusAreas = ['embedded autonomy', 'perception-aware planning', 'hardware-aware robot reliability'];
+const nameWords = site.name.split(' ').length;
+---
+
+<section class="relative overflow-hidden" aria-labelledby="hero-name">
+  <!-- Faint engineering grid behind the hero -->
+  <div class="hero-grid pointer-events-none absolute inset-0 -z-10" aria-hidden="true"></div>
+
+  <div class="container-x pt-8 pb-16 md:pt-20 md:pb-24">
+    <div class="grid items-center gap-6 md:grid-cols-[1fr_17rem] md:gap-14 lg:grid-cols-[1fr_20rem]">
+      <div class="hero-in">
+        <p class="eyebrow mb-4 flex flex-wrap items-baseline gap-x-2" style="--i:0">
+          <span>Robotics research</span>
+          <span aria-hidden="true" class="text-muted">/</span>
+          <span class="sr-only">Focus areas: {focusAreas.join(', ')}.</span>
+          <span class="rotator" aria-hidden="true">
+            <span class="rotator-track">
+              {[...focusAreas, focusAreas[0]].map((f) => <span class="rotator-item">{f}</span>)}
+            </span>
+          </span>
+        </p>
+
+        <SplitText as="h1" id="hero-name" text={site.name} class="text-[2.4rem] leading-[1.08] sm:text-5xl lg:text-6xl" />
+
+        <SplitText
+          as="p"
+          effect="focus"
+          text={site.tagline}
+          start={nameWords + 1}
+          mark={[5, 8]}
+          class="mt-5 font-serif text-2xl leading-snug text-accent italic sm:text-[1.75rem]"
+        />
+
+        <p class="mt-5 max-w-[40rem] text-lg text-muted" style="--i:6">{site.identity}</p>
+        <p
+          class="mt-5 inline-flex items-center gap-2 rounded-full border border-line bg-bg px-3.5 py-1.5 text-sm font-medium"
+          style="--i:7"
+        >
+          <span class="status-dot h-2 w-2 rounded-full bg-accent" aria-hidden="true"></span>
+          {site.status}
+        </p>
+
+        <ul class="mt-8 flex flex-wrap gap-3" aria-label="Links" style="--i:8">
+          <li>
+            <a href={site.cv} class="btn btn-primary btn-shine" download><Icon name="download" /> Download CV</a>
+          </li>
+          <li><a href={`mailto:${site.email}`} class="btn bg-bg"><Icon name="mail" /> Email</a></li>
+          <li><a href={site.github} class="btn bg-bg" rel="me noopener"><Icon name="github" /> GitHub</a></li>
+          <li><a href={site.linkedin} class="btn bg-bg" rel="me noopener"><Icon name="linkedin" /> LinkedIn</a></li>
+          <li><a href={site.scholar} class="btn bg-bg" rel="noopener"><Icon name="scholar" /> Google Scholar</a></li>
+        </ul>
+      </div>
+
+      <div class="hero-photo relative order-first w-40 sm:w-48 md:order-none md:w-auto">
+        <div class="portrait relative aspect-[4/5]">
+          <!-- Disc + LiDAR-style sweep behind the cut-out portrait (decorative) -->
+          <div class="disc-wrap absolute inset-x-[7%] bottom-0 aspect-square" aria-hidden="true">
+            <div class="scan-sweep"></div>
+            <div class="portrait-disc absolute inset-0 rounded-full"></div>
+          </div>
+          <div class="pointer-events-none absolute inset-0 hidden md:block" aria-hidden="true">
+            <span class="scan-ping absolute top-[18%] left-[2%] h-2 w-2 rounded-full bg-accent opacity-0"></span>
+            <span class="scan-ping absolute top-[40%] right-[0%] h-1.5 w-1.5 rounded-full bg-accent opacity-0"></span>
+            <span class="scan-ping absolute bottom-[6%] left-[12%] h-2 w-2 rounded-full bg-accent opacity-0"></span>
+          </div>
+          <!-- To change the photo: replace src/assets/images/portrait-cutout.png with a transparent PNG (head-to-waist). -->
+          <Image
+            src={portrait}
+            alt={`Portrait of ${site.name}`}
+            widths={[200, 320, 480, 720]}
+            sizes="(min-width: 1024px) 20rem, (min-width: 768px) 17rem, (min-width: 640px) 12rem, 10rem"
+            loading="eager"
+            fetchpriority="high"
+            class="portrait-img absolute bottom-0 left-1/2 h-full w-auto max-w-none -translate-x-1/2"
+          />
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  /* Soft teal disc the portrait stands in front of; head and shoulders rise above it. */
+  .portrait-disc {
+    background:
+      radial-gradient(circle at 50% 28%, color-mix(in srgb, var(--accent) 38%, var(--bg)) 0%, color-mix(in srgb, var(--accent) 18%, var(--bg)) 55%, color-mix(in srgb, var(--accent) 8%, var(--bg)) 70.5%, transparent 71%);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 30%, transparent);
+  }
+  .portrait-img {
+    /* Fade the cut-off torso into the page and lift the figure off the disc. */
+    -webkit-mask-image: linear-gradient(to bottom, #000 86%, transparent 100%);
+    mask-image: linear-gradient(to bottom, #000 86%, transparent 100%);
+    filter: drop-shadow(0 18px 24px color-mix(in srgb, var(--text) 22%, transparent));
+  }
+  .hero-grid {
+    background-image:
+      linear-gradient(to right, var(--line) 1px, transparent 1px),
+      linear-gradient(to bottom, var(--line) 1px, transparent 1px);
+    background-size: 48px 48px;
+    opacity: 0.45;
+    -webkit-mask-image: radial-gradient(ellipse 70% 60% at 75% 40%, #000 0%, transparent 75%);
+    mask-image: radial-gradient(ellipse 70% 60% at 75% 40%, #000 0%, transparent 75%);
+  }
+</style>
