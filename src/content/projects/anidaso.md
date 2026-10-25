@@ -41,7 +41,7 @@ Blind students in Ghanaian schools are routinely excluded from science and mathe
 
 **Pairing with a braille keyboard rather than replacing it.** Many students are already trained on braille input hardware. Pairing with it keeps the learning curve on the content rather than on the device.
 
-**Built to be repaired here.** These are the same constraints that shape ARAP, the open-hardware robot platform I lead at Ashesi, and they come from the same place: imported replacement parts can cost a student an academic year.
+**Built to be repaired here.** These are the same constraints that shape the open-hardware robot platform I work on at Ashesi, and they come from the same place: imported replacement parts can cost a student an academic year.
 
 ## Next steps
 

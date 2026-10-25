@@ -7,6 +7,7 @@ affiliation: Assistive Technology Lab, University of Ghana
 supervisor: Dr. Millicent Agangiba
 role: Research Assistant and team lead. I led a team of four, built the gesture interface and adaptive controller, and designed and ran the human-in-the-loop studies.
 order: 2
+featured: true
 heroImage: ../../assets/images/projects/prosthetic-gesture-interface/hero.jpg
 heroAlt: Annotated view of the wearable prosthetic arm, showing the padded socket, adjustable straps, servo compartment and tendon routing to the 3D-printed hand
 gallery:
